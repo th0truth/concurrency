@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Optional, Union, List
 import random
 
 from constants import MAX_RANDINT, MIN_RANDINT
@@ -7,11 +7,11 @@ from constants import MAX_RANDINT, MIN_RANDINT
 class Matrix:
     def __init__(
         self,
-        min_randint: int = MIN_RANDINT,
-        max_randint: int = MAX_RANDINT
+        min_randint: Optional[int] = None,
+        max_randint: Optional[int] = None
     ):
-        self.min_randint = min_randint
-        self.max_randint = max_randint
+        self.min_randint = min_randint or MIN_RANDINT
+        self.max_randint = max_randint or MAX_RANDINT
 
     def create(
         self, rows: int, cols: int, *, randint: bool = False
@@ -45,7 +45,6 @@ class Matrix:
 
         return result
 
-
     def multiplication(
         self,
         A: List[List[Union[int, float]]],
@@ -53,9 +52,7 @@ class Matrix:
     ):
         if len(A) != len(B[0]):
             raise ValueError(
-                """
-                Number of columns in A must equal number of rows in B.
-                """
+                "Number of columns in A must equal number of rows in B."
             )
 
         rows = len(A)
