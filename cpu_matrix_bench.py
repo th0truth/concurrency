@@ -1,24 +1,58 @@
-from pprint import pp
+from typing import Optional
+import argparse
+
+from constants import Matrix2D, MatrixOp
 
 from matrix import Matrix
 
 
+def cpu_bound(
+    rows: int, cols: int,
+    operation: MatrixOp,
+    matrix: Optional[Matrix] = None
+) -> Matrix2D:
+    matrix = matrix or Matrix()
+
+    A = matrix.create(rows, cols, randint=True)
+    B = matrix.create(rows, cols, randint=True)
+    
+    operation(A, B) 
+    
+    
 def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-r", "--rows", required=True, type=int,
+        help="Number of rows of matrix."
+    )
+
+    parser.add_argument(
+        "-c", "--cols", required=True, type=int,
+        help="Number of cols of matrix."
+    )
+
+    parser.add_argument(
+        "-o", "--op", choices=["add", "mult"], default="add",
+        help="Operation to perform: 'add' or 'mult' (default: add).",
+    )
+
+    args = parser.parse_args()
+
     matrix = Matrix()
 
-    A = matrix.create(5, 5, randint=True)
-    B = matrix.create(5, 5, randint=True)
+    operations = {
+        "add": matrix.addition,
+        "mult": matrix.multiplication
+    }
 
-    result_add = matrix.addition(A, B)
+    selected_op = operations[args.op]
+
+    print(f"Running '{args.op}' on {args.rows}x{args.cols} matrices...")
     
-    result_mult = matrix.multiplication(A, B)
-
-    pp(result_add)
-    pp(result_mult)
-
+    cpu_bound(args.rows, args.cols, selected_op, matrix)
+    
 
 if __name__ == "__main__":
     main()
-
-
 
