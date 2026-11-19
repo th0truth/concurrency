@@ -1,5 +1,6 @@
 from typing import Optional
 import argparse
+import time
 
 from utils.constants import Matrix2D, MatrixOp
 from utils.matrix import Matrix
@@ -15,7 +16,15 @@ def cpu_bound(
     A = matrix.create(rows, cols, randint=True)
     B = matrix.create(rows, cols, randint=True)
     
+    start_time = time.perf_counter()
+
     operation(A, B) 
+
+    end_time = time.perf_counter()
+
+    elapsed = end_time - start_time
+
+    print(f"Operation completed in {elapsed:.4f} seconds.")
     
     
 def main():
