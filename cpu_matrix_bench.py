@@ -1,16 +1,20 @@
-from matrix import Matrix
 from pprint import pp
+
+from matrix import Matrix
 
 
 def main():
     matrix = Matrix()
 
-    A = matrix.create(3, 3, randint=True)
-    B = matrix.create(3, 3, randint=True)
+    A = matrix.create(5, 5, randint=True)
+    B = matrix.create(5, 5, randint=True)
 
-    result = matrix.addition(A, B)
+    result_add = matrix.addition(A, B)
+    
+    result_mult = matrix.multiplication(A, B)
 
-    pp(result)
+    pp(result_add)
+    pp(result_mult)
 
 
 if __name__ == "__main__":
