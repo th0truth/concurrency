@@ -46,6 +46,28 @@ class Matrix:
         return result
 
 
+    def multiplication(
+        self,
+        A: List[List[Union[int, float]]],
+        B: List[List[Union[int, float]]]
+    ):
+        if len(A) != len(B[0]):
+            raise ValueError(
+                """
+                Number of columns in A must equal number of rows in B.
+                """
+            )
 
+        rows = len(A)
+        cols = len(B[0])
+        inner = len(B)
 
+        result = self.create(rows, cols)
+
+        for i in range(rows):
+            for j in range(cols):
+                for k in range(inner):
+                    result[i][k] = A[i][k] * B[k][j]
+
+        return result
 
