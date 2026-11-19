@@ -1,7 +1,7 @@
 from typing import Optional, Union, List
 import random
 
-from constants import MAX_RANDINT, MIN_RANDINT
+from utils.constants import MAX_RANDINT, MIN_RANDINT
 
 
 class Matrix:

@@ -1,9 +1,8 @@
 from typing import Optional
 import argparse
 
-from constants import Matrix2D, MatrixOp
-
-from matrix import Matrix
+from utils.constants import Matrix2D, MatrixOp
+from utils.matrix import Matrix
 
 
 def cpu_bound(
