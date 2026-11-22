@@ -86,4 +86,5 @@ class Matrix:
 
         return out
 
-
+    def transpose(self, A: Matrix2D) -> Matrix2D:
+        return [list(_) for _ in zip(*A)]

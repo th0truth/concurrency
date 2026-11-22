@@ -41,8 +41,8 @@ def main():
     )
 
     parser.add_argument(
-        "-o", "--op", choices=["add", "mult"], default="add",
-        help="Operation to perform: 'add' or 'mult' (default: add).",
+        "-o", "--op", choices=["add", "mult", "transpose"], default="add",
+        help="Operation to perform: 'add', 'mult', 'transpose', etc.",
     )
 
     args = parser.parse_args()
@@ -51,7 +51,8 @@ def main():
 
     operations = {
         "add": matrix.addition,
-        "mult": matrix.multiplication
+        "mult": matrix.multiplication,
+        "transpose": lambda A, B: matrix.transpose(A)
     }
 
     selected_op = operations[args.op]
