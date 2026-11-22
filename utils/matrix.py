@@ -1,7 +1,9 @@
 from typing import Optional, Union, List
 import random
 
-from utils.constants import MAX_RANDINT, MIN_RANDINT
+from utils.constants import (
+    Matrix2D, MAX_RANDINT, MIN_RANDINT
+)
 
 
 class Matrix:
@@ -15,7 +17,7 @@ class Matrix:
 
     def create(
         self, rows: int, cols: int, *, randint: bool = False
-    ) -> List[List[float]]:
+    ) -> Matrix2D:
         return [
             [
                 (
@@ -26,11 +28,7 @@ class Matrix:
             for _ in range(rows)
         ]
 
-    def addition(
-        self,
-        A: List[List[Union[int, float]]],
-        B: List[List[Union[int, float]]]
-    ):
+    def addition(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
         if not A or not B or len(A) != len(B) or len(A[0]) != len(B[0]):
             raise ValueError("Matricies must have the same dimensions.")
 
@@ -45,11 +43,7 @@ class Matrix:
 
         return result
 
-    def multiplication(
-        self,
-        A: List[List[Union[int, float]]],
-        B: List[List[Union[int, float]]]
-    ):
+    def multiplication(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
         if not A or not B or len(A[0]) != len(B):
             raise ValueError(
                 "Number of columns in A must equal number of rows in B."
@@ -69,12 +63,9 @@ class Matrix:
         return result
 
     def compute_rows(
-        self,
-        A: List[List[Union[int, float]]],
-        B_cols: List[List[Union[int, float]]],
-        row_start: int,
-        row_end: int
-    ) -> List[List[Union[int, float]]]:
+        self, A: Matrix2D, B_cols: Matrix2D,
+        row_start: int, row_end: int
+    ) -> Matrix2D:
         k = len(A[0])
         n = len(B_cols)
         rrange = row_end - row_start
