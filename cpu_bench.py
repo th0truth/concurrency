@@ -7,6 +7,7 @@ from utils import (
     Matrix2D, MatrixOp, MatrixBase
 )
 
+
 def cpu_bound(
     rows: int, cols: int,
     operation: MatrixOp, rand: bool = False,
