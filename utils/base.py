@@ -17,7 +17,10 @@ class MatrixBase(ABC):
             ]
             for _ in range(rows)
         ]
-   
+    
+    def transpose(self, A: Matrix2D) -> Matrix2D:
+        return [list(_) for _ in zip(*A)]
+
     @abstractmethod
     def addition(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
         pass
@@ -25,7 +28,3 @@ class MatrixBase(ABC):
     @abstractmethod
     def multiplication(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
         pass
-
-    @abstractmethod
-    def transpose(self, A: Matrix2D) -> Matrix2D:
-        return [list(_) for _ in zip(*A)]
