@@ -1,90 +1,58 @@
-from typing import Optional
-import random
+from concurrent.futures import ThreadPoolExecutor
+from typing import List
 
-from utils.constants import (
-    Matrix2D, MAX_RANDINT, MIN_RANDINT
-)
+from utils.base import MatrixBase
+from utils.constants import Matrix2D
 
 
-class Matrix:
-    def __init__(
-        self,
-        min_randint: Optional[int] = None,
-        max_randint: Optional[int] = None
-    ):
-        self.min_randint = min_randint or MIN_RANDINT
-        self.max_randint = max_randint or MAX_RANDINT
-
-    def create(
-        self, rows: int, cols: int, *, randint: bool = False
-    ) -> Matrix2D:
-        return [
-            [
-                (
-                    random.randint(self.min_randint, self.max_randint)
-                    if randint else 0
-                ) for _ in range(cols)
-            ]
-            for _ in range(rows)
-        ]
-
+class MatrixSequentially(MatrixBase):
     def addition(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
-        if not A or not B or len(A) != len(B) or len(A[0]) != len(B[0]):
-            raise ValueError("Matricies must have the same dimensions.")
+        self._validate_addition(A, B)
 
-        rows = len(A)
-        cols = len(A[0])
-
-        result = self.create(rows, cols)
-
-        for i in range(rows):
-            for j in range(cols):
-                result[i][j] = A[i][j] + B[i][j]
-
-        return result
+        return [self._add_rows(a, b) for a, b in zip(A, B)]
 
     def multiplication(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
-        if not A or not B or len(A[0]) != len(B):
-            raise ValueError(
-                "Number of columns in A must equal number of rows in B."
+        self._validate_multiplication(A, B)
+
+        cols_B = self.transpose(B)
+
+        return self._compute_rows(A, cols_B, 0, len(cols_B))
+
+
+class MatrixThreading(MatrixBase):
+    def addition(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> List[Matrix2D]:
+        self._validate_addition(A, B)
+
+        with ThreadPoolExecutor(workers) as executor:
+            return list(
+                executor.map(self._add_rows, A, B)
             )
 
+    def multiplication(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> Matrix2D:
+        self._validate_multiplication(A, B)
+
         rows = len(A)
-        cols = len(B[0])
-        inner = len(B)
+        B_cols = self.transpose(B)    
 
-        result = self.create(rows, cols)
+        chunk_size = (rows + workers - 1) // workers
+        ranges = [
+            (i, min(i + chunk_size, rows))
+            for i in range(0, rows, chunk_size)
+        ]
 
-        for i in range(rows):
-            for j in range(cols):
-                for k in range(inner):
-                    result[i][j] += A[i][k] * B[k][j]
+        with ThreadPoolExecutor(workers) as executor:
+            futures = [
+                executor.submit(self._compute_rows, A, B_cols, start, end)
+                for start, end in ranges
+            ]
+
+            result = []
+
+            for f in futures:
+                result.extend(f.result())
 
         return result
-
-    def compute_rows(
-        self, A: Matrix2D, B_cols: Matrix2D,
-        row_start: int, row_end: int
-    ) -> Matrix2D:
-        k = len(A[0])
-        n = len(B_cols)
-        rrange = row_end - row_start
-
-        out = [[0] * n for _ in range(rrange)]
-
-        for i, row in enumerate(range(row_start, row_end)):
-            row_a = A[row]
-            out_row = out[i]
-
-            for c in range(n):
-                col_b = B_cols[c]
-                result = 0
-
-                for kk in range(k):
-                    result += row_a[kk] * col_b[kk]
-                out_row[c] = result
-
-        return out
-
-    def transpose(self, A: Matrix2D) -> Matrix2D:
-        return [list(_) for _ in zip(*A)]
