@@ -3,9 +3,8 @@ import argparse
 import time
 
 from utils import (
-    MatrixSequentially,
-    Matrix2D, MatrixOp,
-    MatrixBase
+    MatrixSequentially, MatrixThreading,
+    Matrix2D, MatrixOp, MatrixBase
 )
 
 def cpu_bound(
@@ -15,8 +14,8 @@ def cpu_bound(
 ) -> Matrix2D:
     matrix = matrix or MatrixSequentially()
 
-    A = matrix.create(rows, cols, randint=rand)
-    B = matrix.create(rows, cols, randint=rand)
+    A = matrix.create(rows, cols, rand=rand)
+    B = matrix.create(rows, cols, rand=rand)
     
     start_time = time.perf_counter()
 
@@ -59,7 +58,11 @@ def main():
 
     args = parser.parse_args()
 
-    matrix = MatrixSequentially()
+    match args.mode:
+        case "sequential":
+            matrix = MatrixSequentially()
+        case "threaded":
+            matrix = MatrixThreading()
 
     operations = {
         "add": matrix.addition,
