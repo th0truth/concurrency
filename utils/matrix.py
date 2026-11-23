@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from typing import List
 
 from utils.base import MatrixBase
 from utils.constants import Matrix2D
@@ -6,25 +7,12 @@ from utils.constants import Matrix2D
 
 class MatrixSequentially(MatrixBase):
     def addition(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
-        if not A or not B or len(A) != len(B) or len(A[0]) != len(B[0]):
-            raise ValueError("Matricies must have the same dimensions.")
+        self._validate_addition(A, B)
 
-        rows = len(A)
-        cols = len(A[0])
-
-        result = self.create(rows, cols)
-
-        for i in range(rows):
-            for j in range(cols):
-                result[i][j] = A[i][j] + B[i][j]
-
-        return result
+        return [self._add_rows(a, b) for a, b in zip(A, B)]
 
     def multiplication(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
-        if not A or not B or len(A[0]) != len(B):
-            raise ValueError(
-                "Number of columns in A must equal number of rows in B."
-            )
+        self._validate_multiplication(A, B)
 
         rows = len(A)
         cols = len(B[0])
@@ -41,17 +29,20 @@ class MatrixSequentially(MatrixBase):
 
 
 class MatrixThreading(MatrixBase):
-    def addition(self, A: Matrix2D, B: Matrix2D, workers: int = 4):
+    def addition(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> List[Matrix2D]:
+        self._validate_addition(A, B)
+
         with ThreadPoolExecutor(workers) as executor:
             return list(
                 executor.map(self._add_rows, A, B)
             )
 
-    def multiplication(self, A: Matrix2D, B: Matrix2D, workers: int = 4) -> Matrix2D:
-        if not A or not B or len(A[0]) != len(B):
-            raise ValueError(
-                "Number of columns in A must equal number of rows in B."
-            )
+    def multiplication(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> Matrix2D:
+        self._validate_multiplication(A, B)
 
         rows = len(A)
         B_cols = self.transpose(B)    
@@ -75,9 +66,6 @@ class MatrixThreading(MatrixBase):
 
         return result
 
-    def _add_rows(self, row_A: Matrix2D, row_B: Matrix2D) -> Matrix2D:
-        return [x + y for x, y in zip(row_A, row_B)]
-
     def _compute_rows(
         self, A: Matrix2D, cols_B: Matrix2D, start: int, end: int
     ) -> Matrix2D:
@@ -97,6 +85,7 @@ class MatrixThreading(MatrixBase):
 
                 for kk in range(k):
                     result += row_a[kk] * col_b[kk]
+
                 out_row[c] = result
 
         return out
