@@ -14,18 +14,9 @@ class MatrixSequentially(MatrixBase):
     def multiplication(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
         self._validate_multiplication(A, B)
 
-        rows = len(A)
-        cols = len(B[0])
-        inner = len(B)
+        cols_B = self.transpose(B)
 
-        result = self.create(rows, cols)
-
-        for i in range(rows):
-            for j in range(cols):
-                for k in range(inner):
-                    result[i][j] += A[i][k] * B[k][j]
-
-        return result
+        return self._compute_rows(A, cols_B, 0, len(cols_B))
 
 
 class MatrixThreading(MatrixBase):
@@ -65,27 +56,3 @@ class MatrixThreading(MatrixBase):
                 result.extend(f.result())
 
         return result
-
-    def _compute_rows(
-        self, A: Matrix2D, cols_B: Matrix2D, start: int, end: int
-    ) -> Matrix2D:
-        k = len(A[0])
-        n = len(cols_B)
-        rrange = end - start
-
-        out = [[0] * n for _ in range(rrange)]
-
-        for i, row in enumerate(range(start, end)):
-            row_a = A[row]
-            out_row = out[i]
-
-            for c in range(n):
-                col_b = cols_B[c]
-                result = 0
-
-                for kk in range(k):
-                    result += row_a[kk] * col_b[kk]
-
-                out_row[c] = result
-
-        return out
