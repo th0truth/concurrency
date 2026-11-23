@@ -1,33 +1,8 @@
-from typing import Optional
-import random
-
-from utils.constants import (
-    Matrix2D, MAX_RANDINT, MIN_RANDINT
-)
+from utils.base import MatrixBase
+from utils.constants import Matrix2D
 
 
-class Matrix:
-    def __init__(
-        self,
-        min_randint: Optional[int] = None,
-        max_randint: Optional[int] = None
-    ):
-        self.min_randint = min_randint or MIN_RANDINT
-        self.max_randint = max_randint or MAX_RANDINT
-
-    def create(
-        self, rows: int, cols: int, *, randint: bool = False
-    ) -> Matrix2D:
-        return [
-            [
-                (
-                    random.randint(self.min_randint, self.max_randint)
-                    if randint else 0
-                ) for _ in range(cols)
-            ]
-            for _ in range(rows)
-        ]
-
+class MatrixSequentially(MatrixBase):
     def addition(self, A: Matrix2D, B: Matrix2D) -> Matrix2D:
         if not A or not B or len(A) != len(B) or len(A[0]) != len(B[0]):
             raise ValueError("Matricies must have the same dimensions.")
@@ -88,3 +63,7 @@ class Matrix:
 
     def transpose(self, A: Matrix2D) -> Matrix2D:
         return [list(_) for _ in zip(*A)]
+
+
+class MatrixThreading(MatrixBase):
+    pass
