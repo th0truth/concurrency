@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 from utils.base import MatrixBase
 from utils.constants import Matrix2D
 
@@ -61,9 +63,16 @@ class MatrixSequentially(MatrixBase):
 
         return out
 
-    def transpose(self, A: Matrix2D) -> Matrix2D:
-        return [list(_) for _ in zip(*A)]
-
 
 class MatrixThreading(MatrixBase):
-    pass
+    def addition(self, A: Matrix2D, B: Matrix2D, workers: int = 4):
+        with ThreadPoolExecutor(workers) as thread:
+            return list(
+                thread.map(self._add_rows, A, B)
+            )
+
+    def multiplication(self, A, B):
+        raise NotImplementedError("Multiplication not implemented.")
+
+    def _add_rows(self, row_A: Matrix2D, row_B: Matrix2D) -> Matrix2D:
+        return [x + y for x, y in zip(row_A, row_B)]
