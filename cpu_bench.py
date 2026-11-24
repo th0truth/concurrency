@@ -1,10 +1,9 @@
 from typing import Optional
-import argparse
 import time
 
 from utils import (
-    MatrixSequentially, MatrixThreading,
-    MatrixParallel, Matrix2D, MatrixOp, MatrixBase
+    MatrixSequentially, MatrixThreading, MatrixParallel,
+    MatrixOp, MatrixBase, options
 )
 
 
@@ -12,9 +11,7 @@ def cpu_bound(
     rows: int, cols: int,
     operation: MatrixOp, rand: bool = False,
     matrix: Optional[MatrixBase] = None
-) -> Matrix2D:
-    matrix = matrix or MatrixSequentially()
-
+) -> float:
     A = matrix.create(rows, cols, rand=rand)
     B = matrix.create(rows, cols, rand=rand)
     
@@ -24,40 +21,11 @@ def cpu_bound(
 
     end_time = time.perf_counter()
 
-    elapsed = end_time - start_time
+    return start_time - end_time
 
-    print(f"Operation completed in {elapsed:.4f} seconds.")
-    
     
 def main():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-r", "--rows", required=True, type=int,
-        help="Number of rows of matrix."
-    )
-
-    parser.add_argument(
-        "-c", "--cols", required=True, type=int,
-        help="Number of cols of matrix."
-    )
-
-    parser.add_argument(
-        "-o", "--op", choices=["add", "mult", "transpose"], default="add",
-        help="Operation to perform: 'add', 'mult', 'transpose', etc.",
-    )
-
-    parser.add_argument(
-        "--random", action="store_true", default=False,
-        help="Generate random numbers instead of zeros."
-    )
-
-    parser.add_argument(
-        "-m", "--mode", choices=["sequential", "threaded", "parallel"],
-        default="sequential", help="Execution mode."
-    )
-
-    args = parser.parse_args()
+    args = options()
 
     match args.mode:
         case "sequential":
