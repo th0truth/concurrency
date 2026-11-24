@@ -1,4 +1,6 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import (
+    ThreadPoolExecutor, ProcessPoolExecutor
+)
 from typing import List
 
 from utils.base import MatrixBase
@@ -36,18 +38,45 @@ class MatrixThreading(MatrixBase):
         self._validate_multiplication(A, B)
 
         rows = len(A)
-        B_cols = self.transpose(B)    
-
-        chunk_size = (rows + workers - 1) // workers
-        ranges = [
-            (i, min(i + chunk_size, rows))
-            for i in range(0, rows, chunk_size)
-        ]
+        B_cols = self.transpose(B)
 
         with ThreadPoolExecutor(workers) as executor:
             futures = [
                 executor.submit(self._compute_rows, A, B_cols, start, end)
-                for start, end in ranges
+                for start, end in self._get_mult_ranges(rows, workers)
+            ]
+
+            result = []
+
+            for f in futures:
+                result.extend(f.result())
+
+        return result
+
+
+class MatrixParallel(MatrixBase):
+    def addition(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> List[Matrix2D]:
+        self._validate_addition(A, B)
+
+        with ProcessPoolExecutor(workers) as executor:
+            return list(
+                executor.map(self._add_rows, A, B)
+            )
+
+    def multiplication(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> Matrix2D:
+        self._validate_multiplication(A, B)
+
+        rows = len(A)
+        B_cols = self.transpose(B)    
+
+        with ProcessPoolExecutor(workers) as executor:
+            futures = [
+                executor.submit(self._compute_rows, A, B_cols, start, end)
+                for start, end in self._get_mult_ranges(rows, workers)
             ]
 
             result = []

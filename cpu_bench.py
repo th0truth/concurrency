@@ -1,20 +1,21 @@
 from typing import Optional
-import argparse
 import time
 
 from utils import (
-    MatrixSequentially, MatrixThreading,
-    Matrix2D, MatrixOp, MatrixBase
+    MatrixSequentially, MatrixThreading, MatrixParallel,
+    MatrixOp, MatrixBase, options, setup_logging, get_logger
 )
+
+
+setup_logging()
+logger = get_logger(__name__)
 
 
 def cpu_bound(
     rows: int, cols: int,
     operation: MatrixOp, rand: bool = False,
     matrix: Optional[MatrixBase] = None
-) -> Matrix2D:
-    matrix = matrix or MatrixSequentially()
-
+) -> float:
     A = matrix.create(rows, cols, rand=rand)
     B = matrix.create(rows, cols, rand=rand)
     
@@ -24,46 +25,21 @@ def cpu_bound(
 
     end_time = time.perf_counter()
 
-    elapsed = end_time - start_time
+    return end_time - start_time
 
-    print(f"Operation completed in {elapsed:.4f} seconds.")
-    
     
 def main():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-r", "--rows", required=True, type=int,
-        help="Number of rows of matrix."
-    )
-
-    parser.add_argument(
-        "-c", "--cols", required=True, type=int,
-        help="Number of cols of matrix."
-    )
-
-    parser.add_argument(
-        "-o", "--op", choices=["add", "mult", "transpose"], default="add",
-        help="Operation to perform: 'add', 'mult', 'transpose', etc.",
-    )
-
-    parser.add_argument(
-        "--random", action="store_true", default=False,
-        help="Generate random numbers instead of zeros."
-    )
-
-    parser.add_argument(
-        "-m", "--mode", choices=["sequential", "threaded"], default="sequential",
-        help="Execution mode."
-    )
-
-    args = parser.parse_args()
+    args = options()
 
     match args.mode:
         case "sequential":
             matrix = MatrixSequentially()
         case "threaded":
             matrix = MatrixThreading()
+        case "parallel":
+            matrix = MatrixParallel()
+        case _:
+            raise ValueError(f"Unknown mode: {args.mode}")
 
     operations = {
         "add": matrix.addition,
@@ -73,12 +49,16 @@ def main():
 
     selected_op = operations[args.op]
 
-    print(f"Running '{args.op}' on {args.rows}x{args.cols} matrices...")
-    
-    cpu_bound(
-        args.rows, args.cols, selected_op, args.random, matrix
+    logger.info(
+        f"Running '{args.op}' on {args.rows}x{args.cols} matrices..."
     )
     
+    elapsed = cpu_bound(
+        args.rows, args.cols, selected_op, args.random, matrix
+    )
+
+    logger.info(f"Operation completed in {elapsed:.4f} seconds.")
+
 
 if __name__ == "__main__":
     main()
