@@ -3,8 +3,12 @@ import time
 
 from utils import (
     MatrixSequentially, MatrixThreading, MatrixParallel,
-    MatrixOp, MatrixBase, options
+    MatrixOp, MatrixBase, options, setup_logging, get_logger
 )
+
+
+setup_logging()
+logger = get_logger(__name__)
 
 
 def cpu_bound(
@@ -21,7 +25,7 @@ def cpu_bound(
 
     end_time = time.perf_counter()
 
-    return start_time - end_time
+    return end_time - start_time
 
     
 def main():
@@ -45,12 +49,16 @@ def main():
 
     selected_op = operations[args.op]
 
-    print(f"Running '{args.op}' on {args.rows}x{args.cols} matrices...")
-    
-    cpu_bound(
-        args.rows, args.cols, selected_op, args.random, matrix
+    logger.info(
+        f"Running '{args.op}' on {args.rows}x{args.cols} matrices..."
     )
     
+    elapsed = cpu_bound(
+        args.rows, args.cols, selected_op, args.random, matrix
+    )
+
+    logger.info(f"Operation completed in {elapsed:.4f} seconds.")
+
 
 if __name__ == "__main__":
     main()
