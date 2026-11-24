@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List, Tuple
 import random
 
 from utils.constants import Matrix1D, Matrix2D
@@ -55,6 +56,17 @@ class MatrixBase(ABC):
                 out_row[c] = result
 
         return out
+
+    def _get_mult_ranges(
+        self, rows: int, workers: int
+    ) -> List[Tuple[int, int]]:
+        chunk_size = (rows + workers - 1) // workers
+        ranges = [
+            (i, min(i + chunk_size, rows))
+            for i in range(0, rows, chunk_size)
+        ]
+
+        return ranges
 
     @staticmethod
     def _validate_addition(A: Matrix2D, B: Matrix2D):
