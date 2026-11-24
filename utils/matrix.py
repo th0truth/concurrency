@@ -1,4 +1,6 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import (
+    ThreadPoolExecutor, ProcessPoolExecutor
+)
 from typing import List
 
 from utils.base import MatrixBase
@@ -56,3 +58,20 @@ class MatrixThreading(MatrixBase):
                 result.extend(f.result())
 
         return result
+
+
+class MatrixParallel(MatrixBase):
+    def addition(
+        self, A: Matrix2D, B: Matrix2D, workers: int = 4
+    ) -> List[Matrix2D]:
+        self._validate_addition(A, B)
+
+        with ProcessPoolExecutor(workers) as executor:
+            return list(
+                executor.map(self._add_rows, A, B)
+            )
+
+    def multiplication(self, A: Matrix2D, B: Matrix2D):
+        raise NotImplementedError(
+            "Multiplication not implemented yet."
+        )

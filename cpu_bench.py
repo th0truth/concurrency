@@ -4,7 +4,7 @@ import time
 
 from utils import (
     MatrixSequentially, MatrixThreading,
-    Matrix2D, MatrixOp, MatrixBase
+    MatrixParallel, Matrix2D, MatrixOp, MatrixBase
 )
 
 
@@ -53,8 +53,8 @@ def main():
     )
 
     parser.add_argument(
-        "-m", "--mode", choices=["sequential", "threaded"], default="sequential",
-        help="Execution mode."
+        "-m", "--mode", choices=["sequential", "threaded", "parallel"],
+        default="sequential", help="Execution mode."
     )
 
     args = parser.parse_args()
@@ -64,6 +64,10 @@ def main():
             matrix = MatrixSequentially()
         case "threaded":
             matrix = MatrixThreading()
+        case "parallel":
+            matrix = MatrixParallel()
+        case _:
+            raise ValueError(f"Unknown mode: {args.mode}")
 
     operations = {
         "add": matrix.addition,
